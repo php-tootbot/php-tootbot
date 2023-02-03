@@ -29,7 +29,7 @@ use function strtolower;
 class TootBotOptions extends OAuthOptions{
 
 	protected string $instance      = 'https://mastodon.social';
-	protected string $apiToken;
+	protected string $apiToken      = '';
 	protected string $loglevel      = LogLevel::INFO;
 	protected string $logFormat     = "[%datetime%] %channel%.%level_name%: %message%\n";
 	protected string $logDateFormat = 'Y-m-d H:i:s';
