@@ -79,5 +79,5 @@ jobs:
       - name: "Run tests with phpunit"
         run: php vendor/bin/phpunit --configuration=phpunit.xml.dist
 
-#      - name: "Send code coverage report to Codecov.io"
-#        uses: codecov/codecov-action@v3
+      - name: "Send code coverage report to Codecov.io"
+        uses: codecov/codecov-action@v3
