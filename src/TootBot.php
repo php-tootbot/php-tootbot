@@ -18,7 +18,12 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use function random_bytes;
+use function sha1;
+use function sleep;
+use function sprintf;
 
 /**
  *
@@ -80,6 +85,44 @@ abstract class TootBot implements TootBotInterface{
 
 		return (new Mastodon($this->http, $tokenStorage, $this->options, $this->logger))
 			->setInstance($this->options->instance);
+	}
+
+	/**
+	 * @see https://docs.joinmastodon.org/methods/statuses/#form-data-parameters
+	 */
+	protected function submitToot(array $params):void{
+
+		$headers = [
+			'Content-Type'    => 'application/json',
+			'Idempotency-Key' => sha1(random_bytes(128)),
+		];
+
+		$retry = 0;
+		// try to submit the post
+		do{
+			$response = $this->mastodon->request('/v1/statuses', $params, 'POST', $headers);
+
+			if($response->getStatusCode() === 200){
+				$this->submitTootSuccess($response);
+
+				break;
+			}
+
+			$this->logger->warning(sprintf('submit post error: %s (retry #%s)', $response->getReasonPhrase(), $retry));
+
+			$retry++;
+			// we're not going to hammer, we sleep for a bit
+			sleep(2);
+		}
+		while($retry < 3);
+
+	}
+
+	/**
+	 * Optional response processing after post submission (e.g. save toot-id, tick off used dataset...)
+	 */
+	protected function submitTootSuccess(ResponseInterface $response):void{
+		// noop
 	}
 
 }
