@@ -114,9 +114,9 @@ abstract class TootBot implements TootBotInterface{
 			// we're not going to hammer, we sleep for a bit
 			sleep(2);
 		}
-		while($retry < 3);
+		while($retry < $this->options->retries);
 
-		if($retry >= 3){
+		if($retry >= $this->options->retries){
 			$this->submitTootFailure($response);
 		}
 
