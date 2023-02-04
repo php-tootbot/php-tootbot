@@ -116,6 +116,10 @@ abstract class TootBot implements TootBotInterface{
 		}
 		while($retry < 3);
 
+		if($retry >= 3){
+			$this->submitTootFailure($response);
+		}
+
 	}
 
 	/**
@@ -125,4 +129,10 @@ abstract class TootBot implements TootBotInterface{
 		// noop
 	}
 
+	/**
+	 * Optional failed response processing after the maximum number of retries was hit
+	 */
+	protected function submitTootFailure(ResponseInterface $response):void{
+		// noop
+	}
 }
