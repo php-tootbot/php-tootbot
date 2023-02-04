@@ -23,16 +23,18 @@ use function strtolower;
  * @property string $loglevel
  * @property string $logFormat
  * @property string $logDateFormat
+ * @property string $tootVisibility
  * @property string $buildDir
  * @property string $dataDir
 ´ */
 class TootBotOptions extends OAuthOptions{
 
-	protected string $instance      = 'https://mastodon.social';
-	protected string $apiToken      = '';
-	protected string $loglevel      = LogLevel::INFO;
-	protected string $logFormat     = "[%datetime%] %channel%.%level_name%: %message%\n";
-	protected string $logDateFormat = 'Y-m-d H:i:s';
+	protected string $instance       = 'https://mastodon.social';
+	protected string $apiToken       = '';
+	protected string $loglevel       = LogLevel::INFO;
+	protected string $logFormat      = "[%datetime%] %channel%.%level_name%: %message%\n";
+	protected string $logDateFormat  = 'Y-m-d H:i:s';
+	protected string $tootVisibility = 'public';
 	protected string $buildDir;
 	protected string $dataDir;
 
@@ -47,6 +49,16 @@ class TootBotOptions extends OAuthOptions{
 		}
 
 		$this->loglevel = $loglevel;
+	}
+
+	protected function set_tootVisibility(string $tootVisibility):void{
+		$tootVisibility = strtolower($tootVisibility);
+
+		if(!in_array($tootVisibility, ['public', 'unlisted', 'private', 'direct'])){
+			throw new InvalidArgumentException(sprintf('invalid toot visibility: "%s"', $tootVisibility));
+		}
+
+		$this->tootVisibility = $tootVisibility;
 	}
 
 	/**
