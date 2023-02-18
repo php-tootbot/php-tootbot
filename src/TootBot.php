@@ -20,6 +20,7 @@ use Monolog\Logger;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Throwable;
 use function random_bytes;
 use function sha1;
 use function sleep;
@@ -100,7 +101,16 @@ abstract class TootBot implements TootBotInterface{
 		$retry = 0;
 		// try to submit the post
 		do{
-			$response = $this->mastodon->request('/v1/statuses', $params, 'POST', $headers);
+
+			try{
+				$response = $this->mastodon->request('/v1/statuses', $params, 'POST', $headers);
+			}
+			catch(Throwable $e){
+				$this->logger->warning(sprintf('submit post exception: %s (retry #%s)', $e->getMessage(), $retry));
+				$retry++;
+
+				continue;
+			}
 
 			if($response->getStatusCode() === 200){
 				$this->submitTootSuccess($response);
