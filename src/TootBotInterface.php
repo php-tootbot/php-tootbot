@@ -20,6 +20,6 @@ interface TootBotInterface{
 	 *
 	 * This method shall be called from the actions-runner (or cron job)
 	 */
-	public function post():self;
+	public function post():static;
 
 }

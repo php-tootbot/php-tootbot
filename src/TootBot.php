@@ -12,7 +12,7 @@ namespace PHPTootBot\PHPTootBot;
 
 use chillerlan\HTTP\Psr18\CurlClient;
 use chillerlan\OAuth\Core\AccessToken;
-use chillerlan\OAuth\Providers\Mastodon\Mastodon;
+use chillerlan\OAuth\Providers\Mastodon;
 use chillerlan\OAuth\Storage\MemoryStorage;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -75,23 +75,23 @@ abstract class TootBot implements TootBotInterface{
 	 * initializes the Mastodon OAuth client
 	 */
 	protected function initMastodon():Mastodon{
+
 		$tokenParams = [
 			'accessToken' => $this->options->apiToken,
 			'expires'     => AccessToken::EOL_NEVER_EXPIRES,
 		];
 
-
-		$tokenStorage = new MemoryStorage;
-		$tokenStorage->storeAccessToken('Mastodon', new AccessToken($tokenParams));
-
-		return (new Mastodon($this->http, $tokenStorage, $this->options, $this->logger))
-			->setInstance($this->options->instance);
+		return (new Mastodon($this->http, $this->options, $this->logger))
+			->setInstance($this->options->instance)
+			->setStorage(new MemoryStorage)
+			->storeAccessToken(new AccessToken($tokenParams))
+		;
 	}
 
 	/**
 	 * @see https://docs.joinmastodon.org/methods/statuses/#form-data-parameters
 	 */
-	protected function submitToot(array $params):void{
+	protected function submitToot(array $body):void{
 
 		$headers = [
 			'Content-Type'    => 'application/json',
@@ -103,7 +103,7 @@ abstract class TootBot implements TootBotInterface{
 		do{
 
 			try{
-				$response = $this->mastodon->request('/v1/statuses', $params, 'POST', $headers);
+				$response = $this->mastodon->request(path: '/v1/statuses', method: 'POST', body: $body, headers: $headers);
 			}
 			catch(Throwable $e){
 				$this->logger->warning(sprintf('submit post exception: %s (retry #%s)', $e->getMessage(), $retry));
@@ -145,4 +145,5 @@ abstract class TootBot implements TootBotInterface{
 	protected function submitTootFailure(ResponseInterface $response):void{
 		// noop
 	}
+
 }
