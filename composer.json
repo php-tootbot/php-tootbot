@@ -25,11 +25,11 @@
 		"ext-mbstring": "*",
 		"ext-openssl": "*",
 		"chillerlan/php-dotenv": "^2.1.2",
-		"chillerlan/php-oauth-providers": "dev-main#48d83dc04879baea1468d39adf468565b5ef3de0",
+		"chillerlan/php-oauth-providers": "dev-main#406fd8fa03175099e94ea383d04582c2f5f4a6f8",
 		"monolog/monolog": "^3.2"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "^10.0",
+		"phpunit/phpunit": "^10.2",
 		"phan/phan": "^5.4"
 	},
 	"autoload": {
