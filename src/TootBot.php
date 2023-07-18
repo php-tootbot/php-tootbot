@@ -16,6 +16,7 @@ use chillerlan\HTTP\Psr18\CurlClient;
 use chillerlan\OAuth\Core\AccessToken;
 use chillerlan\OAuth\Providers\Mastodon;
 use chillerlan\OAuth\Storage\MemoryStorage;
+use Http\Message\MultipartStream\MultipartStreamBuilder;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -108,6 +109,13 @@ abstract class TootBot implements TootBotInterface{
 	 */
 	protected function initStreamFactory():StreamFactoryInterface{
 		return new StreamFactory;
+	}
+
+	/**
+	 * returns a new multipart stream builder
+	 */
+	protected function getMultipartStreamBuilder():MultipartStreamBuilder{
+		return new MultipartStreamBuilder($this->streamFactory);
 	}
 
 	/**
