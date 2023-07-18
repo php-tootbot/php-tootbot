@@ -11,6 +11,7 @@
 namespace PHPTootBot\PHPTootBot;
 
 use chillerlan\HTTP\Psr17\RequestFactory;
+use chillerlan\HTTP\Psr17\StreamFactory;
 use chillerlan\HTTP\Psr18\CurlClient;
 use chillerlan\OAuth\Core\AccessToken;
 use chillerlan\OAuth\Providers\Mastodon;
@@ -21,6 +22,7 @@ use Monolog\Logger;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use function random_bytes;
@@ -38,6 +40,8 @@ abstract class TootBot implements TootBotInterface{
 	protected ClientInterface         $http;
 	protected Mastodon                $mastodon;
 	protected RequestFactoryInterface $requestFactory;
+	protected StreamFactoryInterface  $streamFactory;
+
 	/**
 	 * TootBot constructor
 	 */
@@ -46,9 +50,10 @@ abstract class TootBot implements TootBotInterface{
 
 		// invoke the worker instances
 		$this->logger         = $this->initLogger();         // PSR-3
-		$this->http           = $this->initHTTP();           // PSR-18
 		$this->requestFactory = $this->initRequestFactory(); // PSR-17
-		$this->mastodon       = $this->initMastodon();
+		$this->streamFactory  = $this->initStreamFactory();  // PSR-17
+		$this->http           = $this->initHTTP();           // PSR-18
+		$this->mastodon       = $this->initMastodon();       // acts as PSR-18
 	}
 
 	/**
@@ -95,7 +100,14 @@ abstract class TootBot implements TootBotInterface{
 	 * initializes a PSR-17 request factory
 	 */
 	protected function initRequestFactory():RequestFactoryInterface{
-		return new RequestFactory();
+		return new RequestFactory;
+	}
+
+	/**
+	 * initializes a PSR-17 stream factory
+	 */
+	protected function initStreamFactory():StreamFactoryInterface{
+		return new StreamFactory;
 	}
 
 	/**
