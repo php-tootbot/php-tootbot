@@ -10,6 +10,7 @@
 
 namespace PHPTootBot\PHPTootBot;
 
+use chillerlan\HTTP\Psr17\RequestFactory;
 use chillerlan\HTTP\Psr18\CurlClient;
 use chillerlan\OAuth\Core\AccessToken;
 use chillerlan\OAuth\Providers\Mastodon;
@@ -18,6 +19,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -31,11 +33,11 @@ use function sprintf;
  */
 abstract class TootBot implements TootBotInterface{
 
-	protected TootBotOptions  $options;
-	protected LoggerInterface $logger;
-	protected ClientInterface $http;
-	protected Mastodon        $mastodon;
-
+	protected TootBotOptions          $options;
+	protected LoggerInterface         $logger;
+	protected ClientInterface         $http;
+	protected Mastodon                $mastodon;
+	protected RequestFactoryInterface $requestFactory;
 	/**
 	 * TootBot constructor
 	 */
@@ -43,9 +45,10 @@ abstract class TootBot implements TootBotInterface{
 		$this->options  = $options;
 
 		// invoke the worker instances
-		$this->logger   = $this->initLogger();   // PSR-3
-		$this->http     = $this->initHTTP();     // PSR-18
-		$this->mastodon = $this->initMastodon();
+		$this->logger         = $this->initLogger();         // PSR-3
+		$this->http           = $this->initHTTP();           // PSR-18
+		$this->requestFactory = $this->initRequestFactory(); // PSR-17
+		$this->mastodon       = $this->initMastodon();
 	}
 
 	/**
@@ -86,6 +89,13 @@ abstract class TootBot implements TootBotInterface{
 			->setStorage(new MemoryStorage)
 			->storeAccessToken(new AccessToken($tokenParams))
 		;
+	}
+
+	/**
+	 * initializes a PSR-17 request factory
+	 */
+	protected function initRequestFactory():RequestFactoryInterface{
+		return new RequestFactory();
 	}
 
 	/**
