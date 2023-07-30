@@ -35,8 +35,8 @@ class TootBotOptions extends OAuthOptions{
 	protected string $logFormat      = "[%datetime%] %channel%.%level_name%: %message%\n";
 	protected string $logDateFormat  = 'Y-m-d H:i:s';
 	protected string $tootVisibility = 'public';
-	protected string $buildDir;
-	protected string $dataDir;
+	protected ?string $buildDir      = null;
+	protected ?string $dataDir       = null;
 
 	/**
 	 *

@@ -25,9 +25,9 @@
 		"ext-mbstring": "*",
 		"ext-openssl": "*",
 		"chillerlan/php-dotenv": "^2.1.2",
-		"chillerlan/php-oauth-providers": "dev-main#406fd8fa03175099e94ea383d04582c2f5f4a6f8",
-		"monolog/monolog": "^3.2",
-		"php-http/multipart-stream-builder": "^1.3"
+		"chillerlan/php-oauth-providers": "dev-main#32c1f0cee2327abeee067938ac602537529d6868",
+		"chillerlan/php-settings-container":"^2.1.4 || ^3.1",
+		"monolog/monolog": "^3.2"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^10.2",
