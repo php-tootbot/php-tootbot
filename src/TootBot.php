@@ -202,12 +202,12 @@ abstract class TootBot implements TootBotInterface{
 			headers  : ['Content-Transfer-Encoding' => 'binary']
 		);
 
-		// an optional thumbnail - the file type should be the same as the image as the MIME is determined by the given filename
+		// an optional thumbnail
 		if($thumbnail !== null){
 			$multipartStreamBuilder->addStream(
 				stream   : $thumbnail,
 				fieldname: 'thumbnail',
-				filename : 'thumbnail-'.$filename,
+				filename : 'thumbnail', // no extension will force auto-detection of the MIME type via fileinfo
 				headers  : ['Content-Transfer-Encoding' => 'binary']
 			);
 		}
