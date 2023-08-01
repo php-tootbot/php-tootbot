@@ -14,6 +14,7 @@ use chillerlan\OAuth\OAuthOptions;
 use InvalidArgumentException;
 use Psr\Log\LogLevel;
 use function in_array;
+use function rtrim;
 use function sprintf;
 use function strtolower;
 
@@ -39,7 +40,14 @@ class TootBotOptions extends OAuthOptions{
 	protected ?string $dataDir       = null;
 
 	/**
-	 *
+	 * Sets the Mastodon instance URL
+	 */
+	protected function set_instance(string $instance):void{
+		$this->instance = rtrim($instance, '/');
+	}
+
+	/**
+	 * Checks and sets the log level
 	 */
 	protected function set_loglevel(string $loglevel):void{
 		$loglevel = strtolower($loglevel);
@@ -51,6 +59,9 @@ class TootBotOptions extends OAuthOptions{
 		$this->loglevel = $loglevel;
 	}
 
+	/**
+	 * Checks and sets the toot visibility (public, unlisted, private, direct)
+	 */
 	protected function set_tootVisibility(string $tootVisibility):void{
 		$tootVisibility = strtolower($tootVisibility);
 
@@ -62,14 +73,14 @@ class TootBotOptions extends OAuthOptions{
 	}
 
 	/**
-	 *
+	 * Sets the build directory - creates it if it doesn't exist
 	 */
 	protected function set_buildDir(string $buildDir):void{
 		$this->buildDir = Util::mkdir($buildDir);
 	}
 
 	/**
-	 *
+	 * Sets the data directory - creates it if it doesn't exist
 	 */
 	protected function set_dataDir(string $dataDir):void{
 		$this->dataDir = Util::mkdir($dataDir);
