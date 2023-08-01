@@ -126,6 +126,7 @@ abstract class TootBot implements TootBotInterface{
 		$headers = [
 			'Content-Type'    => 'application/json',
 			'Idempotency-Key' => sha1(random_bytes(128)),
+			'User-Agent'      => $this->options->user_agent,
 		];
 
 		$retry = 0;
@@ -157,6 +158,7 @@ abstract class TootBot implements TootBotInterface{
 		while($retry < $this->options->retries);
 
 		if($retry >= $this->options->retries){
+			/** @noinspection PhpUndefinedVariableInspection */
 			$this->submitTootFailure($response);
 		}
 
