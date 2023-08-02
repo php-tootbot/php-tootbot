@@ -18,6 +18,7 @@ use chillerlan\HTTP\Utils\MessageUtil;
 use chillerlan\OAuth\Core\AccessToken;
 use chillerlan\OAuth\Providers\Mastodon;
 use chillerlan\OAuth\Storage\MemoryStorage;
+use chillerlan\Settings\SettingsContainerInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -40,17 +41,17 @@ use function sprintf;
  */
 abstract class TootBot implements TootBotInterface{
 
-	protected TootBotOptions          $options;
-	protected LoggerInterface         $logger;
-	protected ClientInterface         $http;
-	protected Mastodon                $mastodon;
-	protected RequestFactoryInterface $requestFactory;
-	protected StreamFactoryInterface  $streamFactory;
+	protected SettingsContainerInterface|TootBotOptions $options;
+	protected LoggerInterface                           $logger;
+	protected ClientInterface                           $http;
+	protected Mastodon                                  $mastodon;
+	protected RequestFactoryInterface                   $requestFactory;
+	protected StreamFactoryInterface                    $streamFactory;
 
 	/**
 	 * TootBot constructor
 	 */
-	public function __construct(TootBotOptions $options){
+	public function __construct(SettingsContainerInterface|TootBotOptions $options){
 		$this->options  = $options;
 
 		// invoke the worker instances
