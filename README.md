@@ -1,5 +1,7 @@
 # php-tootbot
 
+A boilerplate library for Mastodon bots, see [php-tootbot/tootbot-template](https://github.com/php-tootbot/tootbot-template)
+
 [![PHP Version Support][php-badge]][php]
 [![Packagist version][packagist-badge]][packagist]
 [![License][license-badge]][license]
