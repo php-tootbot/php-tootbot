@@ -10,6 +10,10 @@ on:
 
 name: "Continuous Integration"
 
+env:
+  PHP_EXTENSIONS: curl, fileinfo, intl, json, mbstring, simplexml, sodium, zlib
+  PHP_INI_VALUES: memory_limit=-1, error_reporting=-1, display_errors=On
+
 jobs:
 
   static-code-analysis:
@@ -37,9 +41,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          extensions: ast, ${{ env.PHP_EXTENSIONS }}
+          ini-values: ${{ env.PHP_INI_VALUES }}
           coverage: none
-          tools: pecl
-          extensions: ast, curl, fileinfo, json, mbstring, openssl, sodium
 
       - name: "Update dependencies with composer"
         uses: ramsey/composer-install@v3
@@ -71,9 +75,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          ini-values: ${{ env.PHP_INI_VALUES }}
           coverage: pcov
-          tools: pecl
-          extensions: curl, fileinfo, json, mbstring, openssl, sodium
 
       - name: "Install dependencies with composer"
         uses: ramsey/composer-install@v3
