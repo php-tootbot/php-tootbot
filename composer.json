@@ -22,16 +22,10 @@
 			"url": "https://ko-fi.com/codemasher"
 		}
 	],
-	"minimum-stability": "dev",
+	"minimum-stability": "stable",
 	"prefer-stable": true,
 	"require": {
 		"php": "^8.1",
-		"ext-curl": "*",
-		"ext-fileinfo": "*",
-		"ext-json": "*",
-		"ext-mbstring": "*",
-		"ext-openssl": "*",
-		"ext-sodium": "*",
 		"chillerlan/php-dotenv": "^3.0",
 		"chillerlan/php-httpinterface": "^6.0",
 		"chillerlan/php-oauth": "^1.0",
@@ -53,8 +47,8 @@
 		}
 	},
 	"scripts": {
-		"phpunit": "@php vendor/bin/phpunit",
-		"phan": "@php vendor/bin/phan"
+		"phan": "@php vendor/bin/phan",
+		"phpunit": "@php vendor/bin/phpunit"
 	},
 	"config": {
 		"lock": false,
