@@ -10,14 +10,13 @@
 
 namespace PHPTootBot\PHPTootBot;
 
-use chillerlan\HTTP\Common\MultipartStreamBuilder;
-use chillerlan\HTTP\Psr17\RequestFactory;
-use chillerlan\HTTP\Psr17\StreamFactory;
-use chillerlan\HTTP\Psr18\CurlClient;
+use chillerlan\HTTP\CurlClient;
+use chillerlan\HTTP\Psr7\HTTPFactory;
+use chillerlan\HTTP\Psr7\MultipartStreamBuilder;
 use chillerlan\HTTP\Utils\MessageUtil;
 use chillerlan\OAuth\Core\AccessToken;
+use chillerlan\OAuth\OAuthProviderFactory;
 use chillerlan\OAuth\Providers\Mastodon;
-use chillerlan\OAuth\Storage\MemoryStorage;
 use chillerlan\Settings\SettingsContainerInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -27,6 +26,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use function array_map;
@@ -37,7 +37,7 @@ use function sleep;
 use function sprintf;
 
 /**
- *
+ * Abstract PHP TootBot
  */
 abstract class TootBot implements TootBotInterface{
 
@@ -47,29 +47,43 @@ abstract class TootBot implements TootBotInterface{
 	protected Mastodon                                  $mastodon;
 	protected RequestFactoryInterface                   $requestFactory;
 	protected StreamFactoryInterface                    $streamFactory;
+	protected UriFactoryInterface                       $uriFactory;
+	protected OAuthProviderFactory                      $providerFactory;
 
 	/**
 	 * TootBot constructor
 	 */
 	public function __construct(SettingsContainerInterface|TootBotOptions $options){
-		$this->options  = $options;
+		$this->options = $options;
 
 		// invoke the worker instances
 		$this->logger         = $this->initLogger();         // PSR-3
 		$this->requestFactory = $this->initRequestFactory(); // PSR-17
 		$this->streamFactory  = $this->initStreamFactory();  // PSR-17
+		$this->uriFactory     = $this->initUriFactory();     // PSR-17
 		$this->http           = $this->initHTTP();           // PSR-18
-		$this->mastodon       = $this->initMastodon();       // acts as PSR-18
+
+		$this->providerFactory = new OAuthProviderFactory(
+			$this->http,
+			$this->requestFactory,
+			$this->streamFactory,
+			$this->uriFactory,
+			$this->logger,
+		);
+
+		$this->mastodon = $this->initMastodon(); // acts as PSR-18
 	}
 
 	/**
 	 * initializes a PSR-3 logger instance
 	 */
 	protected function initLogger():LoggerInterface{
+
 		// log formatter
 		$formatter = (new LineFormatter($this->options->logFormat, $this->options->logDateFormat, true, true))
 			->setJsonPrettyPrint(true)
 		;
+
 		// a log handler for STDOUT (or STDERR if you prefer)
 		$logHandler = (new StreamHandler('php://stdout', $this->options->loglevel))
 			->setFormatter($formatter)
@@ -82,21 +96,28 @@ abstract class TootBot implements TootBotInterface{
 	 * initializes a PSR-17 request factory
 	 */
 	protected function initRequestFactory():RequestFactoryInterface{
-		return new RequestFactory;
+		return new HTTPFactory;
 	}
 
 	/**
 	 * initializes a PSR-17 stream factory
 	 */
 	protected function initStreamFactory():StreamFactoryInterface{
-		return new StreamFactory;
+		return new HTTPFactory;
+	}
+
+	/**
+	 * initializes a PSR-17 URI factory
+	 */
+	protected function initUriFactory():UriFactoryInterface{
+		return new HTTPFactory;
 	}
 
 	/**
 	 * initializes a PSR-18 http client
 	 */
 	protected function initHTTP():ClientInterface{
-		return new CurlClient(options: $this->options, logger: $this->logger);
+		return new CurlClient(new HTTPFactory, $this->options, $this->logger);
 	}
 
 	/**
@@ -106,12 +127,13 @@ abstract class TootBot implements TootBotInterface{
 
 		$tokenParams = [
 			'accessToken' => $this->options->apiToken,
-			'expires'     => AccessToken::EOL_NEVER_EXPIRES,
+			'expires'     => AccessToken::NEVER_EXPIRES,
 		];
 
-		return (new Mastodon($this->http, $this->options, $this->logger))
+		/** @phan-suppress-next-line PhanUndeclaredMethod */
+		return $this->providerFactory
+			->getProvider(Mastodon::class, $this->options)
 			->setInstance($this->options->instance)
-			->setStorage(new MemoryStorage)
 			->storeAccessToken(new AccessToken($tokenParams))
 		;
 	}
@@ -127,7 +149,9 @@ abstract class TootBot implements TootBotInterface{
 			'User-Agent'      => $this->options->user_agent,
 		];
 
-		$retry = 0;
+		$response = null;
+		$retry    = 0;
+
 		// try to submit the post
 		do{
 
@@ -150,13 +174,13 @@ abstract class TootBot implements TootBotInterface{
 			$this->logger->warning(sprintf('submit post error: %s (retry #%s)', $response->getReasonPhrase(), $retry));
 
 			$retry++;
-			// we're not going to hammer, we sleep for a bit
+			// we're not going to hammer, we'll sleep for a bit
 			sleep(2);
 		}
 		while($retry < $this->options->retries);
 
+		// report the failure, a response may or may not have been received
 		if($retry >= $this->options->retries){
-			/** @noinspection PhpUndefinedVariableInspection */
 			$this->submitTootFailure($response);
 		}
 
@@ -169,12 +193,12 @@ abstract class TootBot implements TootBotInterface{
 	 * @see https://docs.joinmastodon.org/api/guidelines/#focal-points
 	 */
 	protected function uploadMedia(
-		StreamInterface $image,
-		string          $description,
-		string          $filename,
-		StreamInterface $thumbnail = null,
-		array           $focus = null
-	):?string{
+		StreamInterface      $image,
+		string               $description,
+		string               $filename,
+		StreamInterface|null $thumbnail = null,
+		array|null           $focus = null
+	):string|null{
 		// create the multipart body
 		$multipartStreamBuilder = new MultipartStreamBuilder($this->streamFactory);
 
@@ -255,7 +279,7 @@ abstract class TootBot implements TootBotInterface{
 	/**
 	 * Optional failed response processing after the maximum number of retries was hit
 	 */
-	protected function submitTootFailure(ResponseInterface $response):void{
+	protected function submitTootFailure(ResponseInterface|null $response):void{
 		// noop
 	}
 

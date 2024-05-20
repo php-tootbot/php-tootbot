@@ -76,7 +76,7 @@ class Util{
 	 *
 	 * @throws \JsonException
 	 */
-	public static function saveJSON(string $filepath, array|object $data, int $jsonFlags = null):void{
+	public static function saveJSON(string $filepath, array|object $data, int|null $jsonFlags = null):void{
 		$jsonFlags ??= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT;
 		$jsonFlags |= JSON_THROW_ON_ERROR;
 

@@ -1,6 +1,6 @@
 {
 	"name": "php-tootbot/php-tootbot",
-	"description": "A template library for Mastodon bots.",
+	"description": "A boilerplate library for Mastodon bots.",
 	"homepage": "https://github.com/php-tootbot/php-tootbot",
 	"license": "MIT",
 	"type": "library",
@@ -16,6 +16,12 @@
 			"homepage":"https://github.com/php-tootbot/php-tootbot/graphs/contributors"
 		}
 	],
+	"funding": [
+		{
+			"type": "Ko-Fi",
+			"url": "https://ko-fi.com/codemasher"
+		}
+	],
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"require": {
@@ -25,13 +31,15 @@
 		"ext-json": "*",
 		"ext-mbstring": "*",
 		"ext-openssl": "*",
-		"chillerlan/php-dotenv": "^2.1.2",
-		"chillerlan/php-oauth-providers": "dev-main#939366e9d2c366ee4e886deddf444b63899392c7",
-		"chillerlan/php-settings-container": "^2.1.4 || ^3.1",
-		"monolog/monolog": "^3.2"
+		"ext-sodium": "*",
+		"chillerlan/php-dotenv": "^3.0",
+		"chillerlan/php-httpinterface": "^6.0",
+		"chillerlan/php-oauth": "^1.0",
+		"chillerlan/php-settings-container": "^3.2",
+		"monolog/monolog": "^3.6"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "^10.2",
+		"phpunit/phpunit": "^10.5",
 		"phan/phan": "^5.4"
 	},
 	"autoload": {

@@ -10,7 +10,9 @@
 
 namespace PHPTootBot\PHPTootBot;
 
-use chillerlan\OAuth\OAuthOptions;
+use chillerlan\HTTP\HTTPOptionsTrait;
+use chillerlan\OAuth\OAuthOptionsTrait;
+use chillerlan\Settings\SettingsContainerAbstract;
 use InvalidArgumentException;
 use Psr\Log\LogLevel;
 use function in_array;
@@ -19,25 +21,62 @@ use function sprintf;
 use function strtolower;
 
 /**
- * @property string $instance
- * @property string $apiToken
- * @property string $loglevel
- * @property string $logFormat
- * @property string $logDateFormat
- * @property string $tootVisibility
- * @property string $buildDir
- * @property string $dataDir
-´ */
-class TootBotOptions extends OAuthOptions{
+ * Common toot bot options
+´*/
+class TootBotOptions extends SettingsContainerAbstract{
+	use HTTPOptionsTrait, OAuthOptionsTrait;
 
-	protected string $instance       = 'https://mastodon.social';
-	protected string $apiToken       = '';
-	protected string $loglevel       = LogLevel::INFO;
+	/**
+	 * The home instance of this bot, e.g. https://botsin.space/
+	 */
+	protected string $instance = 'https://botsin.space/';
+
+	/**
+	 * The access token from the oauth applcation settings (or any other valid token)
+	 *
+	 * The settings can be found under `[mastodon instance]/settings/applications/[app id]`
+	 *
+	 * @link https://botsin.space/settings/applications
+	 */
+	protected string $apiToken = '';
+
+	/**
+	 * The log level for the internal logger instance
+	 *
+	 * @see \Psr\Log\LogLevel
+	 */
+	protected string $loglevel = LogLevel::INFO;
+
+	/**
+	 * The log format string
+	 *
+	 * @see \Monolog\Formatter\LineFormatter
+	 * @link https://github.com/Seldaek/monolog/blob/main/doc/01-usage.md#customizing-the-log-format
+	 */
 	protected string $logFormat      = "[%datetime%] %channel%.%level_name%: %message%\n";
-	protected string $logDateFormat  = 'Y-m-d H:i:s';
+
+	/**
+	 * @see \DateTimeInterface::format()
+	 * @link https://www.php.net/manual/en/datetime.format.php
+	 */
+	protected string $logDateFormat = 'Y-m-d H:i:s';
+
+	/**
+	 * The visibility of the toots, one of: `public`, `unlisted`, `private`, `direct`
+	 *
+	 * @link https://docs.joinmastodon.org/methods/statuses/#form-data-parameters
+	 */
 	protected string $tootVisibility = 'public';
-	protected ?string $buildDir      = null;
-	protected ?string $dataDir       = null;
+
+	/**
+	 * An optional path to a build directory
+	 */
+	protected string|null $buildDir = null;
+
+	/**
+	 * An optional path to a data directory
+	 */
+	protected string|null $dataDir = null;
 
 	/**
 	 * Sets the Mastodon instance URL

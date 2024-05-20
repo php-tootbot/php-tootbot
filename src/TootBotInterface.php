@@ -16,7 +16,7 @@ namespace PHPTootBot\PHPTootBot;
 interface TootBotInterface{
 
 	/**
-	 * Creates and submits a new post generated ffrom the given dataset
+	 * Creates and submits a new post generated from the given dataset
 	 *
 	 * This method shall be called from the actions-runner (or cron job)
 	 */
